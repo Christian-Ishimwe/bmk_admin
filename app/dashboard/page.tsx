@@ -84,11 +84,11 @@ export default function DashboardHome() {
               </li>
               <li className="flex items-center dark:text-gray-200">
                 <ArrowUpRight className="mr-2 h-4 w-4 text-green-500" />
-                <span>New product "Wireless Headphones" added</span>
+                <span>New product &quot;Wireless Headphones&quot; added</span>
               </li>
               <li className="flex items-center dark:text-gray-200">
                 <ArrowUpRight className="mr-2 h-4 w-4 text-green-500" />
-                <span>Subscription plan "Premium" purchased by user #5678</span>
+                <span>Subscription plan &quot;Premium&quot; purchased by user #5678</span>
               </li>
             </ul>
           </CardContent>
