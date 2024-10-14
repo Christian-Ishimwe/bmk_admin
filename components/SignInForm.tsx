@@ -1,20 +1,44 @@
 'use client'
 
 import { useState } from 'react'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 export default function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement sign-in logic
-    console.log('Sign in attempt with:', { email, password })
+    setIsLoading(true)
+
+    try {
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      })
+
+      if (result?.error) {
+        toast.error(result.error)
+      } else {
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      toast.error('An error occurred during login')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const togglePasswordVisibility = () => {
@@ -61,9 +85,17 @@ export default function SignInForm() {
           </button>
         </div>
       </div>
-      <Button type="submit" className="w-full bg-yellow-500 hover:bg-yellow-600 text-yellow-900">
-        Sign In
+      <Button type="submit" className="w-full bg-yellow-500 hover:bg-yellow-600 text-yellow-900" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Signing In...
+          </>
+        ) : (
+          'Sign In'
+        )}
       </Button>
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </form>
   )
 }
