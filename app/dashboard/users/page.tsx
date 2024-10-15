@@ -12,10 +12,9 @@ import 'react-toastify/dist/ReactToastify.css'
 
 type User = {
   userId: string
-  firstName: string
-  lastName: string
+  name: string
   email: string
-  status: string
+  active: boolean
   createdAt: string
 }
 
@@ -35,8 +34,14 @@ export default function UsersPage() {
         throw new Error('Failed to fetch users')
       }
       const data = await response.json()
-      setUsers(data.users)
-      setTotalPages(Math.ceil(data.total / usersPerPage))
+
+      if (data.data.length === 0) {
+        setUsers([]) // If no users, set the empty array
+        setTotalPages(1) // Set total pages to 1 if no data
+      } else {
+        setUsers(data.data)
+        setTotalPages(data.meta.totalPages)
+      }
     } catch (error) {
       console.error('Error fetching users:', error)
       toast.error('Failed to fetch users')
@@ -50,7 +55,7 @@ export default function UsersPage() {
   }, [currentPage])
 
   const filteredUsers = users.filter(user =>
-    `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${user.name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -82,32 +87,38 @@ export default function UsersPage() {
             </div>
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.userId}>
-                      <TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          user.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {user.status}
-                        </span>
-                      </TableCell>
-                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+              {filteredUsers.length === 0 ? (
+                <div className="flex justify-center items-center h-64">
+                  <p className="text-gray-500">No users found</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created At</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.userId}>
+                        <TableCell className="font-medium">{`${user.name}`}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            user.active  ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {user.active? "Active" : "Inactive"}
+                          </span>
+                        </TableCell>
+                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
               <div className="flex justify-between items-center mt-4">
                 <div>
                   Page {currentPage} of {totalPages}
@@ -115,7 +126,7 @@ export default function UsersPage() {
                 <div className="flex space-x-2">
                   <Button
                     onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
+                    disabled={currentPage === 1 || totalPages === 0}
                     className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -123,7 +134,7 @@ export default function UsersPage() {
                   </Button>
                   <Button
                     onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
+                    disabled={currentPage === totalPages || totalPages === 0}
                     className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900"
                   >
                     Next
