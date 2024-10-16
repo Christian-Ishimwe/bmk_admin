@@ -7,6 +7,15 @@ const nextConfig = {
     config.resolve.alias.encoding = false
     return config
   },
+  images: {
+    remotePatterns:[
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**', // Allow all paths from Cloudinary
+      },
+    ]
+  }
 }
 
 export default nextConfig

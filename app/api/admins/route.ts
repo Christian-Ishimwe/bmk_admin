@@ -27,7 +27,6 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add any necessary authentication headers here
       },
       body: JSON.stringify(body),
     })
