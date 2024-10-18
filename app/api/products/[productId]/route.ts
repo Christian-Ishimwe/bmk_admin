@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: { productId: s
 export async function DELETE(request: Request, { params }: { params: { adminId: string } }) {
   try {
     const { adminId } = params
-    const response = await fetch(`http://localhost:3001/api/admin/admins/${adminId}/delete`, {
+    const response = await fetch(`${process.env.BACKEND_URL}/admins/${adminId}/delete`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

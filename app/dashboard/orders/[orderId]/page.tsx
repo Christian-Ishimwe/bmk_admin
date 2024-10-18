@@ -56,6 +56,7 @@ export default function OrderPage() {
   const params = useParams();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -78,10 +79,28 @@ export default function OrderPage() {
     fetchOrder();
   }, [params.orderId]);
 
-  const handleStatusUpdate = (newStatus: Order['status']) => {
-    if (order) {
-      setOrder({ ...order, status: newStatus });
-      toast.success(`Order status updated to ${newStatus}`);
+  const handleStatusUpdate = async (newStatus: Order['status']) => {
+    if (!order) return;
+    setUpdating(true);
+    try {
+      const response = await fetch(`/api/orders/${params.orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        setOrder((prevOrder) => prevOrder ? { ...prevOrder, status: newStatus } : null);
+        toast.success(`Order status updated to ${newStatus}`);
+      } else {
+        toast.error('Failed to update order status');
+      }
+    } catch (error) {
+      toast.error('Error updating order status');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -189,7 +208,7 @@ export default function OrderPage() {
                 </div>
                 <div>
                   <Label className="text-sm text-gray-500">Total</Label>
-                  <p>${order.totalPrice.toFixed(2)}</p>
+                  <p>SEK {order.totalPrice.toFixed(2)}</p>
                 </div>
                 <div>
                   <Label className="text-sm text-gray-500">Lending From</Label>
@@ -207,7 +226,7 @@ export default function OrderPage() {
               <Label>Product</Label>
               <div>
                 <Label className="text-sm text-gray-500">Product Name</Label>
-                <Link href={`/products/${order.product.id}`}>
+                <Link href={`/dashboard/products/${order.product.id}`}>
                   <p className="text-blue-500 underline cursor-pointer">{order.product.itemName}</p>
                 </Link>
               </div>
@@ -231,21 +250,21 @@ export default function OrderPage() {
                 <Select
                   value={order.status}
                   onValueChange={handleStatusUpdate}
+                  disabled={updating}
                 >
                   <SelectTrigger id="status-update" className="w-[180px] border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500">
                     <SelectValue placeholder="Select new status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
                     <SelectItem value="Delivered">Delivered</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <Button className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900" disabled={order.status === "Cancelled"}>
-                Update Status
+              <Button className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900" disabled={order.status === 'Cancelled' || updating}>
+                {updating ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : 'Update Status'}
               </Button>
-
             </div>
           </div>
         </CardContent>

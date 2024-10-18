@@ -137,7 +137,7 @@ export default function OrdersPage() {
                     <SelectItem value="ALL">All Statuses</SelectItem>
                     <SelectItem value="PENDING">Pending</SelectItem>
                     <SelectItem value="CONFIRMED">Confirmed</SelectItem>
-                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="DELIVERED">Delivered</SelectItem>
                     <SelectItem value="CANCELLED">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
@@ -165,7 +165,7 @@ export default function OrdersPage() {
                 <TableBody>
                   {filteredOrders.map((order) => (
                     <TableRow key={order.id}>
-                      <TableCell className="font-medium">#{order.orderId}</TableCell>
+                      <TableCell className="font-bold"># {order.orderId}</TableCell>
                       <TableCell>{order.borrower.name}</TableCell> {/* Display Borrower's name */}
                       <TableCell>{formatDate(order.orderDate)}</TableCell>
                       <TableCell>{`${formatDate(order.lendingFrom)} - ${formatDate(order.lendingTo)}`}</TableCell>
@@ -174,7 +174,7 @@ export default function OrdersPage() {
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                           order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
                           order.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
-                          order.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'DELIVERED' ? 'bg-blue-100 text-blue-800' :
                           'bg-red-100 text-red-800'
                         }`}>
                           {order.status}

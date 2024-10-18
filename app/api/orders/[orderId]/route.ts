@@ -23,24 +23,28 @@ export async function GET(request: Request, { params }: { params: { orderId: str
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { adminId: string } }) {
+export async function PUT(request: Request, { params }: { params: { orderId: string } }) {
   try {
-    const { adminId } = params
-    const response = await fetch(`http://localhost:3001/api/admin/admins/${adminId}/delete`, {
-      method: 'DELETE',
+    const { orderId } = params
+    const {status}= await request.json()
+    const response = await fetch(`${process.env.BACKEND_URL}/orders/${orderId}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({status})
     })
 
     if (!response.ok) {
       const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to delete admin')
+      throw new Error(errorData.message || 'Failed to Update the status')
     }
 
-    return NextResponse.json({ message: 'Admin deleted successfully' })
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
-    console.error('Error deleting admin:', error)
-    return NextResponse.json({ error: 'Failed to delete admin' }, { status: 500 })
+    console.error('Error updating the status', error)
+    return NextResponse.json({ error: 'To update the status' }, { status: 500 })
   }
+  
 }

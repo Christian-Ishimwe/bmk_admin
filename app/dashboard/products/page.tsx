@@ -127,22 +127,7 @@ export default function ProductsPage() {
                   />
                 </div>
               </div>
-              <div className="w-1/4">
-                <Label htmlFor="category">Category</Label>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="Electronics">Electronics</SelectItem>
-                    <SelectItem value="Furniture">Furniture</SelectItem>
-                    <SelectItem value="Sports">Sports</SelectItem>
-                    <SelectItem value="Tools">Tools</SelectItem>
-                    <SelectItem value="Books">Books</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              
               <div className="w-1/4">
                 <Label htmlFor="availability">Availability</Label>
                 <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
