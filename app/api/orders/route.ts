@@ -4,23 +4,22 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const page = parseInt(searchParams.get('page') || '1', 10)
   const products = parseInt(searchParams.get('limit') || '10', 10)
-
   try {
-    const response = await fetch(`${process.env.BACKEND_URL}/products?page=${page}&limit=${products}`, {
+    const response = await fetch(`${process.env.BACKEND_URL}/orders?page=${page}&limit=${products}`, {
       headers: {
         'Content-Type': 'application/json',
       },
     })
 
     if (!response.ok) {
-      throw new Error('Failed to fetch Products')
+      throw new Error('Failed to fetch Orders, Please try again')
     }
 
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Error fetching Products:', error)
-    return NextResponse.json({ error: 'Failed to fetch Products' }, { status: 500 })
+    console.error('Error fetching Orders:', error)
+    return NextResponse.json({ error: 'Failed to fetch Orders, Try again' }, { status: 500 })
   }
 }
 
