@@ -1,12 +1,23 @@
 import React from 'react'
 import Link from 'next/link'
+import { toast } from 'react-toastify'
 import { Bell, Home, ShoppingCart, Users, Package, CreditCard, Settings, LogOut, Shield, MessageSquare, FileText } from 'lucide-react'
-
+import { signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 type DashboardLayoutProps = {
   children: React.ReactNode
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const router=useRouter()
+  const { data: session, status } = useSession()
+  if(status === 'loading') return null
+  if(status==="unauthenticated"){
+    router.push('/')
+    toast.warning("You need to sign in first")
+    return null
+  }
   return (
     <div className="flex h-screen bg-yellow-50">
       {/* Sidebar */}
@@ -65,7 +76,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="sr-only">View notifications</span>
                 <Bell className="h-6 w-6" />
               </button>
-              <button className="ml-3 p-1 rounded-full text-yellow-600 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+              <button className="ml-3 p-1 rounded-full text-yellow-600 hover:text-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" 
+                onClick={()=>{
+                  signOut()
+                }}
+              >
                 <span className="sr-only">Log out</span>
                 <LogOut className="h-6 w-5" />
               </button>
