@@ -1,26 +1,27 @@
-"use client"
-import { useState } from 'react'
+'use client'
+import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Switch } from '@/components/ui/switch'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { useSession } from 'next-auth/react'
 
 export default function SettingsPage() {
-  // Updated profile state with more fields
+  const { data: session, status } = useSession()
+
   const [profile, setProfile] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1234567890',
-    streetAddress: '123 Main St',
-    city: 'Stockholm',
-    state: 'Stockholm County',
-    country: 'Sweden',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    country: '',
   })
 
   const [password, setPassword] = useState({
@@ -29,14 +30,64 @@ export default function SettingsPage() {
     confirm: '',
   })
 
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: false,
-  })
+  // Fetch the current profile 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        //@ts-ignore
+        const adminId=session?.user?.id
+        const response = await fetch(`/api/settings?adminId=${adminId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setProfile({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone || '',
+            streetAddress: data.streetAddress || '',
+            city: data.city || '',
+            state: data.state || '',
+            country: data.country || '',
+          })
+        } else {
+          toast.error('Failed to fetch profile data')
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+        toast.error('Error fetching profile data')
+      }
+    }
+
+    fetchProfile()
+  }, [session])
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setProfile(prev => ({ ...prev, [name]: value }))
+  }
+
+  // Submit the updated profile data
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      //@ts-ignore
+      const response = await fetch(`/api/settings?adminId=${session?.user?.id}`, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profile),
+      })
+
+      if (response.ok) {
+        toast.success('Profile updated successfully!')
+      } else {
+        toast.error('Failed to update profile')
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      toast.error('Error updating profile')
+    }
   }
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,23 +95,25 @@ export default function SettingsPage() {
     setPassword(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleNotificationChange = (type: 'email' | 'push') => {
-    setNotifications(prev => ({ ...prev, [type]: !prev[type] }))
-  }
-
-  const handleProfileSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // For UI/UX feedback
-    toast.success('Profile updated successfully!')
-  }
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+   const handlePasswordSubmit =async (e: React.FormEvent) => {
     e.preventDefault()
     if (password.new !== password.confirm) {
       toast.error('New passwords do not match!')
       return
     }
-    // For UI/UX feedback
+    try{
+      //@ts-ignore
+      const response = await fetch(`/api/settings/password?adminId=${session?.user?.id}`, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ current: password.current, new: password.new }),
+      })
+    }catch(error){
+      console.error('Error updating password:', error)
+      toast.error('Error updating password')
+    }
     toast.success('Password changed successfully!')
     setPassword({ current: '', new: '', confirm: '' })
   }
@@ -76,7 +129,6 @@ export default function SettingsPage() {
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="password">Password</TabsTrigger>
-              <TabsTrigger value="notifications">Notifications</TabsTrigger>
             </TabsList>
             <TabsContent value="profile">
               <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -111,6 +163,7 @@ export default function SettingsPage() {
                     value={profile.email}
                     onChange={handleProfileChange}
                     required
+                    disabled
                   />
                 </div>
                 <div className="space-y-2">
@@ -208,33 +261,6 @@ export default function SettingsPage() {
                   Change Password
                 </Button>
               </form>
-            </TabsContent>
-
-            <TabsContent value="notifications">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="emailNotifications">Email Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive notifications via email</p>
-                  </div>
-                  <Switch
-                    id="emailNotifications"
-                    checked={notifications.email}
-                    onCheckedChange={() => handleNotificationChange('email')}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="pushNotifications">Push Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive push notifications</p>
-                  </div>
-                  <Switch
-                    id="pushNotifications"
-                    checked={notifications.push}
-                    onCheckedChange={() => handleNotificationChange('push')}
-                  />
-                </div>
-              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
