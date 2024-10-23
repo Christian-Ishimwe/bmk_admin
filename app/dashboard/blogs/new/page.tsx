@@ -23,7 +23,7 @@ export default function NewBlogPost() {
     author: '',
     category: '',
     content: '',
-    featuredImage: null as File | null,
+    images_url: [],
     status: 'draft' as 'draft' | 'published'
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -59,9 +59,7 @@ export default function NewBlogPost() {
       formData.append('category', post.category)
       formData.append('content', post.content)
       formData.append('status', post.status)
-      if (post.featuredImage) {
-        formData.append('featuredImage', post.featuredImage)
-      }
+      
 
       const response = await fetch('/api/blogs', {
         method: 'POST',
@@ -134,7 +132,7 @@ export default function NewBlogPost() {
                 theme="snow"
               />
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="featuredImage">Featured Image</Label>
               <Input
                 id="featuredImage"
@@ -144,8 +142,8 @@ export default function NewBlogPost() {
                 onChange={handleImageUpload}
                 className="border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500"
               />
-            </div>
-            <div className="space-y-2">
+            </div> */}
+            <div className="space-y-2 pt-10">
               <Label htmlFor="status">Status</Label>
               <Select name="status" value={post.status} onValueChange={(value) => handleSelectChange('status', value as 'draft' | 'published')}>
                 <SelectTrigger className="w-full border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500">
