@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Loader2, ChevronLeft, ChevronRight, MoreHorizontal, Trash2, Power, PlusCircle } from 'lucide-react'
+import { Search, Loader2, ChevronLeft, ChevronRight, MoreHorizontal, Trash2, Power, PlusCircle, Plane } from 'lucide-react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import CreateUserModal from './CreateUserModel'
@@ -20,9 +20,13 @@ type User = {
   status: string
   active: boolean
   createdAt: string
+  plan: string
 }
 
 export default function UsersPage() {
+    const [isChangePlanDialogOpen, setIsChangePlanDialogOpen] = useState(false) // New dialog state
+      const [selectedPlan, setSelectedPlan] = useState<string>('') // State for selected plan
+
   const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -120,6 +124,32 @@ export default function UsersPage() {
 };
 
 
+  const handleChangePlanClick = (user: User) => {
+    setSelectedUser(user)
+    setSelectedPlan(user.plan)
+    setIsChangePlanDialogOpen(true)
+  }
+
+  const handlePlanUpdate = async () => {
+    if (selectedUser) {
+      try {
+        const response = await fetch(`/api/users/${selectedUser.userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: selectedPlan }),
+        })
+        if (!response.ok) throw new Error('Failed to update plan')
+        toast.success('Plan updated successfully')
+        fetchUsers(currentPage)
+      } catch (error) {
+        toast.error('Failed to update plan')
+      } finally {
+        setIsChangePlanDialogOpen(false)
+        setSelectedUser(null)
+      }
+    }
+  }
+
   return (
     <DashboardLayout>
       <Card className="w-full">
@@ -154,6 +184,7 @@ export default function UsersPage() {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Plan</TableHead>
                     <TableHead>Created At</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -169,6 +200,9 @@ export default function UsersPage() {
                         }`}>
                           {user.active ? 'Active' : 'Inactive'}
                         </span>
+                      </TableCell>
+                      <TableCell>
+                       {user.plan}
                       </TableCell>
                       <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
@@ -186,6 +220,12 @@ export default function UsersPage() {
                               <Power className="mr-2 h-4 w-4 text-gray-500" />
                               {user.active ? 'Deactivate' : 'Activate'}
                             </DropdownMenuItem>
+
+                           <DropdownMenuItem onClick={() => handleChangePlanClick(user)}>
+                          <Plane className="mr-2 h-4 w-4" />
+                          Change Plan
+                        </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() => confirmDeleteUser(user)}
                               className="flex items-center text-red-600"
@@ -246,6 +286,37 @@ export default function UsersPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+       <Dialog open={isChangePlanDialogOpen} onOpenChange={setIsChangePlanDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Plan</DialogTitle>
+          </DialogHeader>
+          <div className="mb-4">
+          <p className='border-bottom  border-gray-500'>Select New Plan</p>
+            <select
+              value={selectedPlan}
+              onChange={(e) => setSelectedPlan(e.target.value)}
+                className="h-10 w-50 mt-5 border-solid border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500"
+            >
+              <option value="Basic">Basic</option>
+              <option value="1-PREMIUM PASS">One Year Premium Pass</option>
+              <option value="5-PREMIUM PASS">Five Years Premium Pass</option>
+              <option value="1-PREMIUM PLAN">One Month Premium Pass</option>
+
+            </select>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button onClick={() => setIsChangePlanDialogOpen(false)} className="bg-gray-200 hover:bg-gray-300 text-gray-700">
+              Cancel
+            </Button>
+            <Button onClick={handlePlanUpdate} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+              Update
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ToastContainer />
     </DashboardLayout>
   )

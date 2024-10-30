@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           if (user && user.token) {
+            console.log(user)
             return {
               id: user.adminId,
               email: user.email,

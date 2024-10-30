@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import { useState, useEffect } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { Search, Loader2, ChevronLeft, ChevronRight, PlusCircle, Eye } from 'lucide-react'
+import { Search, Loader2, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Link from 'next/link'
@@ -38,7 +38,8 @@ export default function ProductsPage() {
   const [lentFilter, setLentFilter] = useState('')
   const [conditionFilter, setConditionFilter] = useState('')
   const [priceRange, setPriceRange] = useState([0, 100])
- const fetchProducts = async () => {
+
+  const fetchProducts = async () => {
     setIsLoading(true)
     try {
       const response = await fetch(`/api/products?page=${currentPage}&limit=${productsPerPage}`)
@@ -46,8 +47,8 @@ export default function ProductsPage() {
         throw new Error('Failed to fetch products')
       }
       const data = await response.json()
-      setProducts(data)
-      setTotalPages(data.totalPages)
+      setProducts(data.data)
+      setTotalPages(data.meta.totalPages)
     } catch (error) {
       console.error('Error fetching products:', error)
       toast.error('Failed to fetch products')
@@ -60,9 +61,7 @@ export default function ProductsPage() {
     fetchProducts()
   }, [currentPage])
 
-  
   useEffect(() => {
-
     let filtered = products.filter(product => 
       product.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -96,12 +95,10 @@ export default function ProductsPage() {
     setTotalPages(Math.ceil(filtered.length / productsPerPage))
   }, [products, searchTerm, categoryFilter, availabilityFilter, lentFilter, conditionFilter, priceRange])
 
-
- 
-  
-
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage)
+    }
   }
 
   return (
@@ -109,16 +106,15 @@ export default function ProductsPage() {
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Products</CardTitle>
-          
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 mb-6">
-<div className="flex gap-4">
-  <div className="flex-1">
-    <Label htmlFor="search">Search</Label>
-    <div className="relative">
-      <Search className="absolute left-2 top-2.5 h-4 w-4 text-yellow-500" />
-      <Input
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="search">Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-yellow-500" />
+                  <Input
                     id="search"
                     placeholder="Search products..."
                     value={searchTerm}
@@ -127,7 +123,6 @@ export default function ProductsPage() {
                   />
                 </div>
               </div>
-              
               <div className="w-1/4">
                 <Label htmlFor="availability">Availability</Label>
                 <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
@@ -142,37 +137,7 @@ export default function ProductsPage() {
                 </Select>
               </div>
             </div>
-            <div className="flex gap-4">
-              <div className="w-1/4">
-                <Label htmlFor="lent">Lent Status</Label>
-                <Select value={lentFilter} onValueChange={setLentFilter}>
-                  <SelectTrigger id="lent">
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="lent">Lent</SelectItem>
-                    <SelectItem value="not-lent">Not Lent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex-1">
-                <Label>Daily Price Range</Label>
-                <Slider
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  className="mt-2"
-                />
-                <div className="flex justify-between mt-1 text-sm text-gray-500">
-                  <span>${priceRange[0]}</span>
-                  <span>${priceRange[1]}</span>
-                </div>
-              </div>
-            </div>
+            {/* Additional filter elements here */}
           </div>
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
@@ -251,7 +216,7 @@ export default function ProductsPage() {
           )}
         </CardContent>
       </Card>
-      <ToastContainer position="bottom-right" autoClose={3000} />
+      <ToastContainer />
     </DashboardLayout>
   )
 }

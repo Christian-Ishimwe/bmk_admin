@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
-
-export async function GET() {
+import { NextResponse, NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
+export async function GET(req: NextRequest) {
+  revalidatePath(req.url)
   try {
     const response = await fetch(`${process.env.BACKEND_URL}/admins/all`, {
       headers: {
