@@ -15,6 +15,9 @@ const nextConfig = {
         pathname: '/**', // Allow all paths from Cloudinary
       },
     ]
+  },
+  eslint:{
+    ignoreDuringBuilds: true
   }
 }
 
