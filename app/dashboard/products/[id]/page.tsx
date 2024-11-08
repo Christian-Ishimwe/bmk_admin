@@ -53,6 +53,7 @@ type Product = {
 
 const categories = [
   "Electronics",
+  "private",
   "Home & Garden",
   "Sports & Outdoors",
   "Tools & Equipment",
@@ -61,8 +62,28 @@ const categories = [
   "Party & Events",
   "Music & Instruments",
   "Toys & Games",
-  "Books & Media"
-]
+  "Books & Media",
+  "Image and Sounds",
+  "Kitchen",
+  "Transport",
+  "Health & Wellbeing",
+  "Appliances",
+  "African Items",
+  "Norse Relics",
+  "Middle Eastern Items",
+  "Construction Tools",
+  "Protection & Safety Equipment",
+  "Travels & Leisure",
+  "Books & Knowledge",
+  "Instruments",
+  "Premises & Landmarks",
+  "Miscellaneous",
+  "Winter & Stuffs",
+  "Playtime & Hobby",
+  "Social Media Tools",
+  "African Attires & Tools"
+];
+
 
 export default function ProductPage() {
   const params = useParams()
@@ -105,9 +126,11 @@ export default function ProductPage() {
 
   const handleSave = async () => {
     if (!product) return
+    const userId= product.owner.userId
 
     setIsUpdating(true)
     try {
+      product.ownerId= userId
       const response = await fetch(`/api/products/${product.id}`, {
         method: 'PATCH',
         headers: {
@@ -115,7 +138,7 @@ export default function ProductPage() {
         },
         body: JSON.stringify(product),
       })
-
+      console.log(product)
       if (!response.ok) {
         throw new Error('Failed to update product')
       }
@@ -131,6 +154,10 @@ export default function ProductPage() {
       setIsUpdating(false)
     }
   }
+
+ 
+  
+
 
   if (isLoading) {
     return (
@@ -165,19 +192,26 @@ export default function ProductPage() {
     <DashboardLayout>
       <Card className="w-full mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{isEditing ? 'Edit Product' : product.itemName}</CardTitle>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900"
-              onClick={() => router.push('/dashboard/products')}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Products
-            </Button>
-            
-          </div>
-        </CardHeader>
+  <CardTitle>{isEditing ? 'Edit Product' : product.itemName}</CardTitle>
+  <div className="flex space-x-2">
+    <Button
+      variant="outline"
+      className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900"
+      onClick={() => router.push('/dashboard/products')}
+    >
+      <ArrowLeft className="mr-2 h-4 w-4" />
+      Back to Products
+    </Button>
+    <Button
+      variant="outline"
+      className="bg-gray-200 hover:bg-gray-300 text-gray-700"
+      onClick={() => setIsEditing(!isEditing)}
+    >
+      {isEditing ? 'Cancel Edit' : 'Edit'}
+    </Button>
+  </div>
+</CardHeader>
+
         <CardContent>
           <div className="grid gap-6">
             <div className="grid md:grid-cols-2 gap-4">
@@ -191,16 +225,52 @@ export default function ProductPage() {
                   disabled={!isEditing}
                 />
               </div>
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  value={product.category}
-                  disabled={!isEditing}
-                />  
-                
-                  
-                  
-              </div>
+             <div>
+  <Label htmlFor="category">Category</Label>
+  <select
+    id="category"
+    name="category"
+    value={product.category}
+    onChange={(e) => setProduct({ ...product, category: e.target.value })}
+    disabled={!isEditing}
+    className="border border-gray-300 rounded-md p-2 mt-1 w-full"
+  >
+    <option value="" disabled>
+      Select Category
+    </option>
+    <option value="Electronics">Electronics</option>
+    <option value="private">Private</option>
+    <option value="Home & Garden">Home & Garden</option>
+    <option value="Sports & Outdoors">Sports & Outdoors</option>
+    <option value="Tools & Equipment">Tools & Equipment</option>
+    <option value="Vehicles">Vehicles</option>
+    <option value="Clothing & Accessories">Clothing & Accessories</option>
+    <option value="Party & Events">Party & Events</option>
+    <option value="Music & Instruments">Music & Instruments</option>
+    <option value="Toys & Games">Toys & Games</option>
+    <option value="Books & Media">Books & Media</option>
+    <option value="Image and Sounds">Image and Sounds</option>
+    <option value="Kitchen">Kitchen</option>
+    <option value="Transport">Transport</option>
+    <option value="Health & Wellbeing">Health & Wellbeing</option>
+    <option value="Appliances">Appliances</option>
+    <option value="African Items">African Items</option>
+    <option value="Norse Relics">Norse Relics</option>
+    <option value="Middle Eastern Items">Middle Eastern Items</option>
+    <option value="Construction Tools">Construction Tools</option>
+    <option value="Protection & Safety Equipment">Protection & Safety Equipment</option>
+    <option value="Travels & Leisure">Travels & Leisure</option>
+    <option value="Books & Knowledge">Books & Knowledge</option>
+    <option value="Instruments">Instruments</option>
+    <option value="Premises & Landmarks">Premises & Landmarks</option>
+    <option value="Miscellaneous">Miscellaneous</option>
+    <option value="Winter & Stuffs">Winter & Stuffs</option>
+    <option value="Playtime & Hobby">Playtime & Hobby</option>
+    <option value="Social Media Tools">Social Media Tools</option>
+    <option value="African Attires & Tools">African Attires & Tools</option>
+  </select>
+</div>
+
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
@@ -440,17 +510,17 @@ export default function ProductPage() {
             <div className="flex items-center space-x-4">
               <User className="h-12 w-12 text-yellow-500" />
               <div>
-                <p className="font-semibold">{product.owner.name}</p>
-                <p className="text-sm text-gray-500">{product.owner.email}</p>
+                <p className="font-semibold">{product?.owner?.name}</p>
+                <p className="text-sm text-gray-500">{product?.owner?.email}</p>
               </div>
             </div>
             <div>
               <Label>Phone</Label>
-              <p>{product.owner.phone}</p>
+              <p>{product?.owner?.phone}</p>
             </div>
             <div>
               <Label>Address</Label>
-              <p>{product.owner.address}</p>
+              <p>{product?.owner?.address}</p>
             </div>
           </div>
         </CardContent>

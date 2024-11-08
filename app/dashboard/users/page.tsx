@@ -133,10 +133,10 @@ export default function UsersPage() {
   const handlePlanUpdate = async () => {
     if (selectedUser) {
       try {
-        const response = await fetch(`/api/users/${selectedUser.userId}`, {
+        const response = await fetch(`${process.env.BACKEND_URL}/plan`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan: selectedPlan }),
+          body: JSON.stringify({ plan: selectedPlan, userId: selectedUser.userId }),
         })
         if (!response.ok) throw new Error('Failed to update plan')
         toast.success('Plan updated successfully')
@@ -299,11 +299,9 @@ export default function UsersPage() {
               onChange={(e) => setSelectedPlan(e.target.value)}
                 className="h-10 w-50 mt-5 border-solid border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500"
             >
-              <option value="Basic">Basic</option>
-              <option value="1-PREMIUM PASS">One Year Premium Pass</option>
-              <option value="5-PREMIUM PASS">Five Years Premium Pass</option>
-              <option value="1-PREMIUM PLAN">One Month Premium Pass</option>
-
+              <option value="BASIC">Basic</option>
+              <option value="PREMIUM">PREMIUM</option>
+              <option value="PREMIUM_PLUS">PREMIUM PLUS</option>
             </select>
           </div>
           <div className="flex justify-end space-x-2">

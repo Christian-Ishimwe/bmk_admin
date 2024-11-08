@@ -44,3 +44,29 @@ export async function DELETE(request: Request, { params }: { params: { adminId: 
     return NextResponse.json({ error: 'Failed to delete admin' }, { status: 500 })
   }
 }
+
+export async function PATCH(request: Request, { params }: { params: { productId: string } }) {
+  try {
+    const { productId } = params
+    const productUpdates = await request.json() // Parse the JSON body from the request
+
+    const response = await fetch(`${process.env.BACKEND_URL}/products/${productId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productUpdates), // Send the updates in the request body
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Failed to update product')
+    }
+
+    const updatedProduct = await response.json()
+    return NextResponse.json(updatedProduct)
+  } catch (error) {
+    console.error('Error updating product:', error)
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 })
+  }
+}

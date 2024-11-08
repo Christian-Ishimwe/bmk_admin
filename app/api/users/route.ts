@@ -58,3 +58,32 @@ export async function POST(request: Request) {
 }
 
 
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json()
+    const { userId, plan } = body
+
+    const response = await fetch(`${process.env.BACKEND_URL}/plan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({plan, userId}),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Failed to create user')
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
+  } catch (error) {
+    //@ts-ignore
+    const message= error.message
+    console.log()
+    return NextResponse.json({ error: message}, { status: 500 })
+  }
+}
+
+
