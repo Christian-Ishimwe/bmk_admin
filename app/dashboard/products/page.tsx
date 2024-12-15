@@ -1,105 +1,141 @@
-"use client"
-import { useState, useEffect } from 'react'
-import DashboardLayout from '@/components/DashboardLayout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
-import { Search, Loader2, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import Link from 'next/link'
+"use client";
+import { useState, useEffect } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import truncateText from "@/lib/helpers";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, Loader2, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 type Product = {
-  id: string
-  itemName: string
-  category: string
-  dailyPricing: number
-  isAvailable: boolean
-  isLent: boolean
-  condition: string
-}
+  id: string;
+  itemName: string;
+  category: string;
+  dailyPricing: number;
+  isAvailable: boolean;
+  isLent: boolean;
+  condition: string;
+};
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const productsPerPage = 10
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const productsPerPage = 10;
 
   // Filters
-  const [categoryFilter, setCategoryFilter] = useState('')
-  const [availabilityFilter, setAvailabilityFilter] = useState('')
-  const [lentFilter, setLentFilter] = useState('')
-  const [conditionFilter, setConditionFilter] = useState('')
-  const [priceRange, setPriceRange] = useState([0, 100])
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [availabilityFilter, setAvailabilityFilter] = useState("");
+  const [lentFilter, setLentFilter] = useState("");
+  const [conditionFilter, setConditionFilter] = useState("");
+  const [priceRange, setPriceRange] = useState([0, 100]);
 
   const fetchProducts = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch(`/api/products?page=${currentPage}&limit=${productsPerPage}`)
+      const response = await fetch(`/api/products`);
       if (!response.ok) {
-        throw new Error('Failed to fetch products')
+        throw new Error("Failed to fetch products");
       }
-      const data = await response.json()
-      setProducts(data.data)
-      setTotalPages(data.meta.totalPages)
+      const data = await response.json();
+      setProducts(data.products);
+      setTotalProducts(data.totalProducts);
     } catch (error) {
-      console.error('Error fetching products:', error)
-      toast.error('Failed to fetch products')
+      console.error("Error fetching products:", error);
+      toast.error("Failed to fetch products");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchProducts()
-  }, [currentPage])
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
-    let filtered = products.filter(product => 
-      product.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    let filtered = products.filter(
+      (product) =>
+        product.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    if (categoryFilter && categoryFilter !== 'all') {
-      filtered = filtered.filter(product => product.category === categoryFilter)
+    if (categoryFilter && categoryFilter !== "all") {
+      filtered = filtered.filter(
+        (product) => product.category === categoryFilter
+      );
     }
 
-    if (availabilityFilter && availabilityFilter !== 'all') {
-      filtered = filtered.filter(product => 
-        availabilityFilter === 'available' ? product.isAvailable : !product.isAvailable
-      )
+    if (availabilityFilter && availabilityFilter !== "all") {
+      filtered = filtered.filter((product) =>
+        availabilityFilter === "available"
+          ? product.isAvailable
+          : !product.isAvailable
+      );
     }
 
-    if (lentFilter && lentFilter !== 'all') {
-      filtered = filtered.filter(product => 
-        lentFilter === 'lent' ? product.isLent : !product.isLent
-      )
+    if (lentFilter && lentFilter !== "all") {
+      filtered = filtered.filter((product) =>
+        lentFilter === "lent" ? product.isLent : !product.isLent
+      );
     }
 
-    if (conditionFilter && conditionFilter !== 'all') {
-      filtered = filtered.filter(product => product.condition === conditionFilter)
+    if (conditionFilter && conditionFilter !== "all") {
+      filtered = filtered.filter(
+        (product) => product.condition === conditionFilter
+      );
     }
 
-    filtered = filtered.filter(product => 
-      product.dailyPricing >= priceRange[0] && product.dailyPricing <= priceRange[1]
-    )
+    filtered = filtered.filter(
+      (product) =>
+        product.dailyPricing >= priceRange[0] &&
+        product.dailyPricing <= priceRange[1]
+    );
 
-    setFilteredProducts(filtered)
-    setTotalPages(Math.ceil(filtered.length / productsPerPage))
-  }, [products, searchTerm, categoryFilter, availabilityFilter, lentFilter, conditionFilter, priceRange])
+    setFilteredProducts(filtered);
+  }, [
+    products,
+    searchTerm,
+    categoryFilter,
+    availabilityFilter,
+    lentFilter,
+    conditionFilter,
+    priceRange,
+  ]);
+
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage)
+      setCurrentPage(newPage);
     }
-  }
+  };
 
   return (
     <DashboardLayout>
@@ -125,7 +161,10 @@ export default function ProductsPage() {
               </div>
               <div className="w-1/4">
                 <Label htmlFor="availability">Availability</Label>
-                <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                <Select
+                  value={availabilityFilter}
+                  onValueChange={setAvailabilityFilter}
+                >
                   <SelectTrigger id="availability">
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
@@ -137,7 +176,6 @@ export default function ProductsPage() {
                 </Select>
               </div>
             </div>
-            {/* Additional filter elements here */}
           </div>
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
@@ -158,29 +196,43 @@ export default function ProductsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProducts.map((product) => (
+                  {paginatedProducts.map((product) => (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium">{product.itemName}</TableCell>
+                      <TableCell className="font-medium">
+                        {product.itemName}
+                      </TableCell>
                       <TableCell>{product.category}</TableCell>
                       <TableCell>${product.dailyPricing.toFixed(2)}</TableCell>
-                      <TableCell>{product.condition}</TableCell>
+                      <TableCell>{truncateText(product.condition, 20)}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          product.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {product.isAvailable ? 'Yes' : 'No'}
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            product.isAvailable
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {product.isAvailable ? "Yes" : "No"}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          product.isLent ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {product.isLent ? 'Yes' : 'No'}
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            product.isLent
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {product.isLent ? "Yes" : "No"}
                         </span>
                       </TableCell>
                       <TableCell>
                         <Link href={`/dashboard/products/${product.id}`}>
-                          <Button variant="outline" size="sm" className="mr-2 text-yellow-600 border-yellow-300 hover:bg-yellow-50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mr-2 text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
@@ -218,5 +270,5 @@ export default function ProductsPage() {
       </Card>
       <ToastContainer />
     </DashboardLayout>
-  )
+  );
 }
