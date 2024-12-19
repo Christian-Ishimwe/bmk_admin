@@ -49,10 +49,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Package className="mr-3 h-5 w-5" />
             Products
           </Link>
-          {/* <Link href="/dashboard/subscriptions" className="flex items-center px-4 py-2 text-yellow-800 hover:bg-yellow-200">
+          <Link href="/dashboard/subscriptions" className="flex items-center px-4 py-2 text-yellow-800 hover:bg-yellow-200">
             <CreditCard className="mr-3 h-5 w-5" />
             Subscriptions
-          </Link> */}
+          </Link>
           <Link href="/dashboard/admins" className="flex items-center px-4 py-2 text-yellow-800 hover:bg-yellow-200">
             <Shield className="mr-3 h-5 w-5" />
             Admins
