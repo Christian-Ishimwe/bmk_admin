@@ -4,6 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import ClientProvider from "./ClientProvider";
+import MigrationNotice from "@/components/PaymentRequest";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -27,13 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <ClientProvider>
 <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <MigrationNotice/>
       </body>
-      </ClientProvider>
       
     </html>
   );
