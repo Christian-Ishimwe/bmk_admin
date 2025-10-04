@@ -1,6 +1,8 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import dotenv from 'dotenv';
 
+dotenv.config();
 interface User {
   id: string;
   email: string;
@@ -59,7 +61,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  secret: "e3ff0aa5802645b4211bf7daa9c69515",
+  secret: secretKey || 'default_secret_key',
   session: {
     strategy: 'jwt',
   },
