@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  secret: secretKey,
+  secret: "e3ff0aa5802645b4211bf7daa9c69515",
   session: {
     strategy: 'jwt',
   },
