@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(req: NextRequest, { params }: { params: {id: string} }) {
+export async function GET(req: NextRequest, { params }: { params:Promise<{id: string}> }) {
     try{
-        const { id } =params
+        const { id } = await params
         const response = await fetch(`${process.env.BACKEND_URL}/blogs/${id}`, { method: 'GET' })
         const data = await response.json()
         if(!response.ok){
@@ -17,9 +17,9 @@ export async function GET(req: NextRequest, { params }: { params: {id: string} }
 
 
 
-export async function DELETE(req: NextRequest, { params }: { params: {id: string} }) {
+export async function DELETE(req: NextRequest, { params }: { params:Promise<{id: string}> }) {
     try{
-        const { id } =params
+        const { id } = await params
         const response = await fetch(`${process.env.BACKEND_URL}/blogs/${id}`, { method: 'DELETE' })
         const data = await response.json()
         if(!response.ok){
@@ -32,9 +32,9 @@ export async function DELETE(req: NextRequest, { params }: { params: {id: string
 }
 
 
-export async function PUT(req: NextRequest, { params }: { params: {id: string} }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{id: string}> }) {
     try{
-        const { id } =params
+        const { id } = await params
         const postData = await req.json()
         console.log(postData)
         const response = await fetch(`${process.env.BACKEND_URL}/blogs/${id}`, {

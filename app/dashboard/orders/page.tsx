@@ -1,109 +1,166 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import DashboardLayout from '@/components/DashboardLayout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Loader2, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import Link from 'next/link'
+import { useState, useEffect, useCallback } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, Loader2, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 type Borrower = {
-  userId: string
-  name: string
-  email: string
-  verified: boolean
-  role: string
-  plan: string
-  active: boolean
-  country: string
-  createdAt: string
-}
+  userId: string;
+  name: string;
+  email: string;
+  verified: boolean;
+  role: string;
+  plan: string;
+  active: boolean;
+  country: string;
+  createdAt: string;
+};
 
 type Order = {
-  id: number
-  orderId: string
-  productId: string
-  borrowerId: string
-  lenderId: string
-  orderDate: string
-  lendingFrom: string
-  lendingTo: string
-  totalPrice: number
-  status: string
-  paymentMethod: string | null
-  createdAt: string
-  updatedAt: string
-  borrower: Borrower
-}
+  id: number;
+  orderId: string;
+  productId: string;
+  borrowerId: string;
+  lenderId: string;
+  orderDate: string;
+  lendingFrom: string;
+  lendingTo: string;
+  totalPrice: number;
+  status: string;
+  paymentMethod: string | null;
+  createdAt: string;
+  updatedAt: string;
+  borrower: Borrower;
+};
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const ordersPerPage = 10
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const ordersPerPage = 10;
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  const fetchOrdersCb = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/orders?page=${currentPage}&limit=${ordersPerPage}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+      const data = await response.json();
+      setOrders(data);
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      toast.error("Failed to fetch orders");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage]);
+
+  const applyFiltersCb = useCallback(() => {
+    let filtered = orders.filter(
+      (order) =>
+        order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.productId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.borrower.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.borrowerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.lenderId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (statusFilter !== "ALL") {
+      filtered = filtered.filter((order) => order.status === statusFilter);
+    }
+
+    setFilteredOrders(filtered);
+  }, [orders, searchTerm, statusFilter]);
 
   useEffect(() => {
-    fetchOrders()
-  }, [currentPage])
+    fetchOrdersCb();
+  }, [fetchOrdersCb]);
 
   useEffect(() => {
-    applyFilters()
-  }, [orders, searchTerm, statusFilter])
+    applyFiltersCb();
+  }, [applyFiltersCb]);
 
   const fetchOrders = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch(`/api/orders?page=${currentPage}&limit=${ordersPerPage}`)
+      const response = await fetch(
+        `/api/orders?page=${currentPage}&limit=${ordersPerPage}`
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch orders')
+        throw new Error("Failed to fetch orders");
       }
-      const data = await response.json()
-      setOrders(data)
-      setTotalPages(data.totalPages)
+      const data = await response.json();
+      setOrders(data);
+      setTotalPages(data.totalPages);
     } catch (error) {
-      console.error('Error fetching orders:', error)
-      toast.error('Failed to fetch orders')
+      console.error("Error fetching orders:", error);
+      toast.error("Failed to fetch orders");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const applyFilters = () => {
-    let filtered = orders.filter(order => 
-      order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.productId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.borrower.name.toLowerCase().includes(searchTerm.toLowerCase()) ||  // Filter by borrower name
-      order.borrowerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.lenderId.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    let filtered = orders.filter(
+      (order) =>
+        order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.productId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.borrower.name.toLowerCase().includes(searchTerm.toLowerCase()) || // Filter by borrower name
+        order.borrowerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.lenderId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(order => order.status === statusFilter)
+    if (statusFilter !== "ALL") {
+      filtered = filtered.filter((order) => order.status === statusFilter);
     }
 
-    setFilteredOrders(filtered)
-  }
+    setFilteredOrders(filtered);
+  };
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-  }
+    setCurrentPage(newPage);
+  };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-  }
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <DashboardLayout>
@@ -154,8 +211,10 @@ export default function OrdersPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead> {/* New column for Borrower */}
+                    <TableHead>Customer</TableHead>{" "}
+                    {/* New column for Borrower */}
                     <TableHead>Order Date</TableHead>
+                    <TableHead>Payment Method</TableHead>
                     <TableHead>Lending Period</TableHead>
                     <TableHead>Total Price</TableHead>
                     <TableHead>Status</TableHead>
@@ -165,24 +224,41 @@ export default function OrdersPage() {
                 <TableBody>
                   {filteredOrders.map((order) => (
                     <TableRow key={order.id}>
-                      <TableCell className="font-bold"># {order.orderId}</TableCell>
-                      <TableCell>{order.borrower.name}</TableCell> {/* Display Borrower's name */}
+                      <TableCell className="font-bold">
+                        # {order.orderId}
+                      </TableCell>
+                      <TableCell>{order.borrower.name}</TableCell>{" "}
+                      {/* Display Borrower's name */}
                       <TableCell>{formatDate(order.orderDate)}</TableCell>
-                      <TableCell>{`${formatDate(order.lendingFrom)} - ${formatDate(order.lendingTo)}`}</TableCell>
+                      <TableCell>
+                        {order.paymentMethod?.toUpperCase() || "N/A"}
+                      </TableCell>
+                      <TableCell>{`${formatDate(
+                        order.lendingFrom
+                      )} - ${formatDate(order.lendingTo)}`}</TableCell>
                       <TableCell>SEK {order.totalPrice.toFixed(2)}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                          order.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
-                          order.status === 'DELIVERED' ? 'bg-blue-100 text-blue-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            order.status === "PENDING"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : order.status === "CONFIRMED"
+                              ? "bg-green-100 text-green-800"
+                              : order.status === "DELIVERED"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
                           {order.status}
                         </span>
                       </TableCell>
                       <TableCell>
                         <Link href={`/dashboard/orders/${order.orderId}`}>
-                          <Button variant="outline" size="sm" className="text-yellow-600 border-yellow-300 hover:bg-yellow-50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-yellow-600 border-yellow-300 hover:bg-yellow-50"
+                          >
                             <Eye className="h-4 w-4 mr-2" />
                             View
                           </Button>
@@ -221,5 +297,5 @@ export default function OrdersPage() {
       </Card>
       <ToastContainer position="bottom-right" autoClose={3000} />
     </DashboardLayout>
-  )
+  );
 }

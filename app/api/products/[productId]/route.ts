@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 
-export async function GET(request: Request, { params }: { params: { productId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ productId: string }> }) {
   try {
-    const { productId } = params
+    const { productId } = await params
     const response = await fetch(`${process.env.BACKEND_URL}/products/${productId}`, {
       method: 'GET',
       headers: {
@@ -23,10 +23,11 @@ export async function GET(request: Request, { params }: { params: { productId: s
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { adminId: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ productId: string }> }) {
   try {
-    const { adminId } = params
-    const response = await fetch(`${process.env.BACKEND_URL}/admins/${adminId}/delete`, {
+    const { productId } = await params
+
+    const response = await fetch(`${process.env.BACKEND_URL}/products/${productId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -34,20 +35,20 @@ export async function DELETE(request: Request, { params }: { params: { adminId: 
     })
 
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || 'Failed to delete admin')
+      const errorData = await response.json().catch(() => ({ message: response.statusText }))
+      return NextResponse.json({ error: errorData.message || 'Failed to delete product' }, { status: response.status || 500 })
     }
 
-    return NextResponse.json({ message: 'Admin deleted successfully' })
+    return NextResponse.json({ message: 'Product deleted successfully' })
   } catch (error) {
-    console.error('Error deleting admin:', error)
-    return NextResponse.json({ error: 'Failed to delete admin' }, { status: 500 })
+    console.error('Error deleting product:', error)
+    return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 })
   }
 }
 
-export async function PATCH(request: Request, { params }: { params: { productId: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ productId: string }> }) {
   try {
-    const { productId } = params
+    const { productId } = await params
     const productUpdates = await request.json() // Parse the JSON body from the request
 
     const response = await fetch(`${process.env.BACKEND_URL}/products/${productId}`, {

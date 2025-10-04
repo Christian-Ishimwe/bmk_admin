@@ -2,6 +2,9 @@
 const nextConfig = {
     crossOrigin: 'anonymous',
   reactStrictMode: true,
+  turbopack: {
+    root: './',
+  },
   webpack: (config) => {
     config.resolve.alias.canvas = false
     config.resolve.alias.encoding = false

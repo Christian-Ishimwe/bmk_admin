@@ -133,7 +133,7 @@ export default function UsersPage() {
   const handlePlanUpdate = async () => {
     if (selectedUser) {
       try {
-        const response = await fetch(`${process.env.BACKEND_URL}/plan`, {
+        const response = await fetch(`/api/users/plan`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ plan: selectedPlan, userId: selectedUser.userId }),

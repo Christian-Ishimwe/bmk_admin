@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Search, PlusCircle, Loader2 } from 'lucide-r
 import { toast } from 'react-toastify'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { set } from 'date-fns'
+import Link from 'next/link'
 
 
 
@@ -156,13 +157,12 @@ export default function SubscriptionsPage() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <Link
+                          href={"/dashboard/users"}
                           className="mr-2 text-yellow-600 border-yellow-300 hover:bg-yellow-50"
                         >
                           Edit
-                        </Button>
+                        </Link>
                         <Button
                           variant="outline"
                           size="sm"

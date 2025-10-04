@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 
-export async function PATCH(request: Request, { params }: { params: { adminId: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ adminId: string }> }) {
   try {
-    const { adminId } = params
+    const { adminId } = await params
     const body = await request.json()
     const response = await fetch(`${process.env.BACKEND_URL}/admins/${adminId}/status`, {
       method: 'PATCH',
@@ -25,9 +25,9 @@ export async function PATCH(request: Request, { params }: { params: { adminId: s
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { adminId: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ adminId: string }> }) {
   try {
-    const { adminId } = params
+    const { adminId } = await params
     const response = await fetch(`${process.env.BACKEND_URL}/admins/${adminId}/delete`, {
       method: 'DELETE',
       headers: {

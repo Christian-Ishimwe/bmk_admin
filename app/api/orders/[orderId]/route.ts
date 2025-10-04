@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 
-export async function GET(request: Request, { params }: { params: { orderId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
   try {
-    const { orderId } = params
+    const { orderId } = await params
     const response = await fetch(`${process.env.BACKEND_URL}/orders/${orderId}`, {
       method: 'GET',
       headers: {
@@ -23,9 +23,9 @@ export async function GET(request: Request, { params }: { params: { orderId: str
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { orderId: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ orderId: string }> }){
   try {
-    const { orderId } = params
+    const { orderId } =await params
     const {status}= await request.json()
     const response = await fetch(`${process.env.BACKEND_URL}/orders/${orderId}`, {
       method: 'PUT',

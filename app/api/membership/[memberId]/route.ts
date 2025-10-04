@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function DELETE(req:NextRequest, {params}: {params: {memberId: string}}){
+export async function DELETE(request: Request, { params }: { params: Promise<{ memberId: string }> }) {
     try{
-        const {memberId}= params
+        const {memberId}=await params
         const response = await fetch(`${process.env.BACKEND_URL}/membership/${memberId}`, {
             method: "DELETE",
             headers: {

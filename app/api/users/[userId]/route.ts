@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
-export async function DELETE(request: Request, { params }: { params: { userId: string } }) {
-  const { userId } = params;
+export async function DELETE(request: Request, { params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params;
   if (!userId) {
     return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
   }
@@ -26,8 +26,8 @@ export async function DELETE(request: Request, { params }: { params: { userId: s
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { userId: string } }) {
-  const { userId } = params;
+export async function PUT(req: Request, { params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params;
   const { active } = await req.json();
 
   if (!userId) {
