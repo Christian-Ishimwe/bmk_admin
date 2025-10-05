@@ -1,8 +1,5 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import dotenv from 'dotenv';
-
-dotenv.config();
 interface User {
   id: string;
   email: string;
@@ -11,7 +8,7 @@ interface User {
   token?: string;
 }
 
-const secretKey = process.env.NEXTAUTH_SECRET!;
+const secretKey = process.env.NEXTAUTH_SECRET;
 
 export const authOptions: NextAuthOptions = {
   providers: [
